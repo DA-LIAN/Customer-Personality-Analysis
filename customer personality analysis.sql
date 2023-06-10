@@ -69,6 +69,40 @@ SELECT d.marital_status,SUM(p.wine) ,SUM(p.fruit),SUM(p.meat),SUM(p.fish),SUM(p.
 JOIN Product P
 ON d.id = p.id
 GROUP BY d.marital_status
+ORDER BY Total DESC;
+
+# Find the average, max, min age of customers
+SELECT AVG(age) avg_age, MAX(age) max_age, MIN(age) min_age FROM demographic;
+
+# Classify age into discrete categories.
+
+SELECT 
+	CASE WHEN age BETWEEN 21 AND 40 THEN '21-40'
+        WHEN age BETWEEN 41 AND 60 THEN '41-60'
+        WHEN age BETWEEN 61 AND 80 THEN '61-80'
+        ELSE '80+' END AS age_group
+FROM demographic
+GROUP BY age_group;
+
+
+# Looking for the age group with the shortest repurchase time.
+SELECT DENSE_RANK() OVER (ORDER BY avg_recency DESC) AS 'rank',age_group ,avg_recency
+FROM(
+SELECT 
+	CASE WHEN age BETWEEN 21 AND 40 THEN '21-40'
+		WHEN age BETWEEN 41 AND 60 THEN '41-60'
+		WHEN age BETWEEN 61 AND 80 THEN '61-80'
+		ELSE '80+' END AS age_group,AVG(recency) avg_recency
+FROM demographic
+GROUP BY age_group) A;
+
+# Places of Purchase and Website Browsing of People with Different Marital Status
+SELECT d.marital_status,AVG(web_purchase), AVG(catalogue_purchase),AVG(store_purchase) , AVG(web_visit),
+(AVG(web_purchase) + AVG(catalogue_purchase) + AVG(store_purchase))/3 total_avg
+FROM demographic d
+JOIN place P
+ON d.id = p.id
+GROUP BY d.marital_status;
 
 
 
